@@ -32,6 +32,10 @@ class Base(pl.LightningModule):
         # to jit these models in `export.py`
         self.l1      = torch.nn.L1Loss()
         self.stft    = auraloss.freq.STFTLoss()
+        
+        # initialize lists to store outputs for epoch end hooks (PyTorch Lightning 2.0)
+        self.validation_step_outputs = []
+        self.test_step_outputs = []
 
     def forward(self, x, p):
         pass
@@ -95,17 +99,23 @@ class Base(pl.LightningModule):
         self.log('val_loss/L1', l1_loss)
         self.log('val_loss/STFT', stft_loss)
 
-        # move tensors to cpu for logging
+        # move tensors to cpu for logging (convert to float32 for numpy compatibility)
         outputs = {
-            "input" : input_crop.cpu().numpy(),
-            "target": target_crop.cpu().numpy(),
-            "pred"  : pred.cpu().numpy(),
-            "params" : params.cpu().numpy()}
+            "input" : input_crop.cpu().float().numpy(),
+            "target": target_crop.cpu().float().numpy(),
+            "pred"  : pred.cpu().float().numpy(),
+            "params" : params.cpu().float().numpy()}
 
+        # store outputs for epoch end hook (PyTorch Lightning 2.0)
+        self.validation_step_outputs.append(outputs)
+        
         return outputs
 
     @torch.jit.unused
-    def validation_epoch_end(self, validation_step_outputs):
+    def on_validation_epoch_end(self):
+        # access stored outputs from instance attribute (PyTorch Lightning 2.0)
+        validation_step_outputs = self.validation_step_outputs
+        
         # flatten the output validation step dicts to a single dict
         outputs = {
             "input" : [],
@@ -162,14 +172,61 @@ class Base(pl.LightningModule):
                                 f"{idx}-pred-{self.hparams.train_loss}-{int(prm[0]):1d}-{prm[1]:0.2f}.wav"), 
                                 torch.tensor(p).view(1,-1).float(),
                                 sample_rate=self.hparams.sample_rate)
+        
+        # clear stored outputs to free memory (PyTorch Lightning 2.0)
+        self.validation_step_outputs.clear()
 
     @torch.jit.unused
     def test_step(self, batch, batch_idx):
-        return self.validation_step(batch, batch_idx)
+        input, target, params = batch
+
+        # pass the input thrgouh the mode
+        pred = self(input, params)
+
+        # crop the input and target signals
+        if self.hparams.causal:
+            input_crop = causal_crop(input, pred.shape[-1])
+            target_crop = causal_crop(target, pred.shape[-1])
+        else:
+            input_crop = center_crop(input, pred.shape[-1])
+            target_crop = center_crop(target, pred.shape[-1])
+
+        # compute the validation error using all losses
+        l1_loss      = self.l1(pred, target_crop)
+        stft_loss    = self.stft(pred, target_crop)
+        
+        aggregate_loss = l1_loss + stft_loss 
+
+        self.log('test_loss', aggregate_loss)
+        self.log('test_loss/L1', l1_loss)
+        self.log('test_loss/STFT', stft_loss)
+
+        # move tensors to cpu for logging (convert to float32 for numpy compatibility)
+        outputs = {
+            "input" : input_crop.cpu().float().numpy(),
+            "target": target_crop.cpu().float().numpy(),
+            "pred"  : pred.cpu().float().numpy(),
+            "params" : params.cpu().float().numpy()}
+
+        # store outputs for epoch end hook (PyTorch Lightning 2.0)
+        self.test_step_outputs.append(outputs)
+        
+        return outputs
 
     @torch.jit.unused
-    def test_epoch_end(self, test_step_outputs):
-        return self.validation_epoch_end(test_step_outputs)
+    def on_test_epoch_end(self):
+        # access stored outputs from instance attribute (PyTorch Lightning 2.0)
+        test_step_outputs = self.test_step_outputs
+        
+        # reuse the validation epoch end logic
+        # temporarily swap the outputs
+        temp_outputs = self.validation_step_outputs
+        self.validation_step_outputs = test_step_outputs
+        self.on_validation_epoch_end()
+        
+        # restore validation outputs and clear test outputs
+        self.validation_step_outputs = temp_outputs
+        self.test_step_outputs.clear()
 
     @torch.jit.unused
     def configure_optimizers(self):

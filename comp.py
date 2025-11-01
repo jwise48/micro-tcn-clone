@@ -10,7 +10,8 @@ import torchaudio
 from microtcn.tcn import TCNModel
 from microtcn.lstm import LSTMModel
 
-torchaudio.set_audio_backend("sox_io")
+# Note: torchaudio.set_audio_backend is deprecated in torchaudio 2.x
+# The dispatcher automatically handles backend selection
 
 def load_model(model_dir, model_id, gpu=False):
 
@@ -136,4 +137,3 @@ if __name__ == '__main__':
         else:
             process(inputfile, args.limit, args.peak_red, gpu=args.gpu, verbose=args.verbose)
     print()
-   
