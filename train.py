@@ -289,6 +289,17 @@ if __name__ == '__main__':
             dict_args["hidden_size"] = tconf["hidden_size"]
             model = LSTMModel(**dict_args)
 
+        # compile model for ~20-35% speedup (PyTorch 2.x)
+        if hasattr(torch, 'compile'):
+            compile_mode = "max-autotune"  # 'reduce-overhead' or 'default'
+            print(f"⚡ Compiling model (mode='{compile_mode}')...")
+            try:
+                model = torch.compile(model, mode=compile_mode)
+                print("✅ Model compiled successfully")
+            except Exception as e:
+                print(f"⚠️  Compilation failed: {e}")
+                print("   Proceeding without compilation...")
+
         # summary 
         torchsummary.summary(model, [(1,65536), (1,2)], device="cpu")
 
