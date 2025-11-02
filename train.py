@@ -200,6 +200,8 @@ if __name__ == '__main__':
         # parse them args
         args = parser.parse_args()
 
+        tconf["batch_size"] = args.batch_size
+
         # set the seed
         pl.seed_everything(42)
 
