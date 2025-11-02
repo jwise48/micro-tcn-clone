@@ -11,6 +11,30 @@ from microtcn.lstm import LSTMModel
 from microtcn.data import SignalTrainLA2ADataset
 
 torch.backends.cudnn.benchmark = True
+"""
+Preference of 'medium' for a good balance of speed/accuracy.
+Use 'high' for maximum speed  with slightly lower precision.
+"""
+torch.set_float32_matmul_precision('medium')  # Add this line
+
+"""
+The 14 Model Configurations:
+1. uTCN-300 (causal, 1% train data) - tiny dataset test
+2. uTCN-100 (causal, 100% data) - smaller receptive field
+3. uTCN-300 (causal, 100% data) - standard micro-TCN
+4. uTCN-1000 (causal, 100% data) - larger receptive field
+5. uTCN-100 (non-causal, 100% data)
+6. uTCN-300 (non-causal, 100% data)
+7. uTCN-1000 (non-causal, 100% data)
+8. TCN-300 (non-causal, 10 blocks instead of 4)
+9. uTCN-300 (causal, 10% data) - ablation study
+10. LSTM-32 (baseline comparison)
+11. uTCN-300 (causal, different dilation pattern: 3-60-5)
+12. uTCN-300 (causal, L1 loss only)
+13. uTCN-300 (non-causal, 30 blocks - deeper)
+14. uTCN-324-16 (non-causal, 16 channels instead of 32)
+
+"""
 
 train_configs = [
     {"name" : "uTCN-300",
@@ -149,7 +173,7 @@ if __name__ == '__main__':
 
     for idx, tconf in enumerate(train_configs):
 
-        #if (idx+1) not in [14]: continue
+        #if (idx+1) not in [14]: continue - ex: [3, 6, 8, 10, 14]
         # if you only want to train a specific model
 
         parser = ArgumentParser()
@@ -165,8 +189,8 @@ if __name__ == '__main__':
         parser.add_argument('--train_length', type=int, default=65536)
         parser.add_argument('--train_fraction', type=float, default=1.0)
         parser.add_argument('--eval_length', type=int, default=131072)
-        parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--num_workers', type=int, default=8)
+        parser.add_argument('--batch_size', type=int, default=128)
+        parser.add_argument('--num_workers', type=int, default=12)
 
         # add trainer options expected for PyTorch Lightning 2.x compatibility
         parser.add_argument('--max_epochs', type=int, default=60)
