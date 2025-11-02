@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
         # compile model for ~20-35% speedup (PyTorch 2.x)
         if hasattr(torch, 'compile'):
-            compile_mode = "max-autotune"  # 'reduce-overhead' or 'default'
+            compile_mode = "reduce-overhead"  # 'reduce-overhead' or 'default'
             print(f"⚡ Compiling model (mode='{compile_mode}')...")
             try:
                 model = torch.compile(model, mode=compile_mode)
