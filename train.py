@@ -241,7 +241,6 @@ if __name__ == '__main__':
             accelerator=args.accelerator if hasattr(args, 'accelerator') else 'auto',
             devices=args.devices if hasattr(args, 'devices') else 1,
             default_root_dir=args.default_root_dir,
-            check_val_every_n_epoch=3,
         )
 
         # setup the dataloaders
