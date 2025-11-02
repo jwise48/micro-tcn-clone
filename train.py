@@ -15,7 +15,7 @@ torch.backends.cudnn.benchmark = True
 Preference of 'medium' for a good balance of speed/accuracy.
 Use 'high' for maximum speed  with slightly lower precision.
 """
-torch.set_float32_matmul_precision('medium')  # Add this line
+torch.set_float32_matmul_precision('medium')
 
 """
 The 14 Model Configurations:
@@ -43,8 +43,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 13,
      "causal" : True,
-     "train_fraction" : 0.01,
-     "batch_size" : 32
+     "train_fraction" : 0.01
     },
     {"name" : "uTCN-100",
      "model_type" : "tcn",
@@ -52,8 +51,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : True,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-300",
      "model_type" : "tcn",
@@ -61,8 +59,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 13,
      "causal" : True,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-1000",
      "model_type" : "tcn",
@@ -70,8 +67,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : True,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-100",
      "model_type" : "tcn",
@@ -79,8 +75,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : False,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-300",
      "model_type" : "tcn",
@@ -88,8 +83,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 13,
      "causal" : False,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-1000",
      "model_type" : "tcn",
@@ -97,8 +91,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : False,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "TCN-300",
      "model_type" : "tcn",
@@ -106,8 +99,7 @@ train_configs = [
      "dilation_growth" : 2,
      "kernel_size" : 15,
      "causal" : False,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-300",
      "model_type" : "tcn",
@@ -115,15 +107,13 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 13,
      "causal" : True,
-     "train_fraction" : 0.10,
-     "batch_size" : 32
+     "train_fraction" : 0.10
     },
     {"name" : "LSTM-32",
      "model_type" : "lstm",
      "num_layers" : 1,
      "hidden_size" : 32,
-     "train_fraction" : 1.00,
-     "batch_size" : 32
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-300",
      "model_type" : "tcn",
@@ -131,8 +121,7 @@ train_configs = [
      "dilation_growth" : 60,
      "kernel_size" : 5,
      "causal" : True,
-     "train_fraction" : 1.0,
-     "batch_size" : 32
+     "train_fraction" : 1.0
     },
     {"name" : "uTCN-300",
      "model_type" : "tcn",
@@ -141,7 +130,6 @@ train_configs = [
      "kernel_size" : 13,
      "causal" : True,
      "train_fraction" : 1.0,
-     "batch_size" : 32,
      "max_epochs" : 60,
      "train_loss" : "l1"
     },
@@ -152,7 +140,6 @@ train_configs = [
      "kernel_size" : 15,
      "causal" : False,
      "train_fraction" : 1.0,
-     "batch_size" : 32,
      "max_epochs" : 60,
     },
     {"name" : "uTCN-324-16",
@@ -162,7 +149,6 @@ train_configs = [
      "kernel_size" : 15,
      "causal" : False,
      "train_fraction" : 1.0,
-     "batch_size" : 32,
      "max_epochs" : 60,
      "channel_width" : 16,
     },
@@ -189,7 +175,7 @@ if __name__ == '__main__':
         parser.add_argument('--train_length', type=int, default=65536)
         parser.add_argument('--train_fraction', type=float, default=1.0)
         parser.add_argument('--eval_length', type=int, default=131072)
-        parser.add_argument('--batch_size', type=int, default=128)
+        parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--num_workers', type=int, default=12)
 
         # add trainer options expected for PyTorch Lightning 2.x compatibility
@@ -253,6 +239,7 @@ if __name__ == '__main__':
             accelerator=args.accelerator if hasattr(args, 'accelerator') else 'auto',
             devices=args.devices if hasattr(args, 'devices') else 1,
             default_root_dir=args.default_root_dir,
+            check_val_every_n_epoch=3,
         )
 
         # setup the dataloaders
@@ -268,7 +255,7 @@ if __name__ == '__main__':
 
         train_dataloader = torch.utils.data.DataLoader(train_dataset, 
                                                     shuffle=args.shuffle,
-                                                    batch_size=tconf["batch_size"],
+                                                    batch_size=args.batch_size,
                                                     num_workers=args.num_workers,
                                                     pin_memory=True)
 
@@ -280,7 +267,7 @@ if __name__ == '__main__':
 
         val_dataloader = torch.utils.data.DataLoader(val_dataset, 
                                                     shuffle=False,
-                                                    batch_size=8,
+                                                    batch_size=args.batch_size // 2,
                                                     num_workers=args.num_workers,
                                                     pin_memory=True)
 
