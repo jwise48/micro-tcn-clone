@@ -37,15 +37,7 @@ The 14 Model Configurations:
 """
 
 train_configs = [
-    {"name" : "uTCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 4,
-     "dilation_growth" : 10,
-     "kernel_size" : 13,
-     "causal" : True,
-     "train_fraction" : 0.01
-    },
-    {"name" : "uTCN-100",
+    {"name" : "uTCN-100-C",
      "model_type" : "tcn",
      "nblocks" : 4,
      "dilation_growth" : 10,
@@ -53,7 +45,7 @@ train_configs = [
      "causal" : True,
      "train_fraction" : 1.00
     },
-    {"name" : "uTCN-300",
+    {"name" : "uTCN-300-C",
      "model_type" : "tcn",
      "nblocks" : 4,
      "dilation_growth" : 10,
@@ -61,7 +53,7 @@ train_configs = [
      "causal" : True,
      "train_fraction" : 1.00
     },
-    {"name" : "uTCN-1000",
+    {"name" : "uTCN-1000-C",
      "model_type" : "tcn",
      "nblocks" : 5,
      "dilation_growth" : 10,
@@ -69,7 +61,7 @@ train_configs = [
      "causal" : True,
      "train_fraction" : 1.00
     },
-    {"name" : "uTCN-100",
+    {"name" : "uTCN-100-N",
      "model_type" : "tcn",
      "nblocks" : 4,
      "dilation_growth" : 10,
@@ -77,7 +69,7 @@ train_configs = [
      "causal" : False,
      "train_fraction" : 1.00
     },
-    {"name" : "uTCN-300",
+    {"name" : "uTCN-300-N",
      "model_type" : "tcn",
      "nblocks" : 4,
      "dilation_growth" : 10,
@@ -85,7 +77,7 @@ train_configs = [
      "causal" : False,
      "train_fraction" : 1.00
     },
-    {"name" : "uTCN-1000",
+    {"name" : "uTCN-1000-N",
      "model_type" : "tcn",
      "nblocks" : 5,
      "dilation_growth" : 10,
@@ -93,56 +85,7 @@ train_configs = [
      "causal" : False,
      "train_fraction" : 1.00
     },
-    {"name" : "TCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 10,
-     "dilation_growth" : 2,
-     "kernel_size" : 15,
-     "causal" : False,
-     "train_fraction" : 1.00
-    },
-    {"name" : "uTCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 4,
-     "dilation_growth" : 10,
-     "kernel_size" : 13,
-     "causal" : True,
-     "train_fraction" : 0.10
-    },
-    {"name" : "LSTM-32",
-     "model_type" : "lstm",
-     "num_layers" : 1,
-     "hidden_size" : 32,
-     "train_fraction" : 1.00
-    },
-    {"name" : "uTCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 3,
-     "dilation_growth" : 60,
-     "kernel_size" : 5,
-     "causal" : True,
-     "train_fraction" : 1.0
-    },
-    {"name" : "uTCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 4,
-     "dilation_growth" : 10,
-     "kernel_size" : 13,
-     "causal" : True,
-     "train_fraction" : 1.0,
-     "max_epochs" : 60,
-     "train_loss" : "l1"
-    },
-    {"name" : "uTCN-300",
-     "model_type" : "tcn",
-     "nblocks" : 30,
-     "dilation_growth" : 2,
-     "kernel_size" : 15,
-     "causal" : False,
-     "train_fraction" : 1.0,
-     "max_epochs" : 60,
-    },
-    {"name" : "uTCN-324-16",
+    {"name" : "uTCN-324-N",
      "model_type" : "tcn",
      "nblocks" : 10,
      "dilation_growth" : 2,
@@ -159,7 +102,7 @@ if __name__ == '__main__':
 
     for idx, tconf in enumerate(train_configs):
 
-        #if (idx+1) not in [14]: continue - ex: [3, 6, 8, 10, 14]
+        #if (idx+1) not in [14]: continue
         # if you only want to train a specific model
 
         parser = ArgumentParser()
