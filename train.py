@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 from microtcn.tcn import TCNModel
 from microtcn.lstm import LSTMModel
 from microtcn.data import SignalTrainLA2ADataset
+from export import export_model
 
 torch.backends.cudnn.benchmark = True
 """
@@ -127,6 +128,10 @@ if __name__ == '__main__':
         parser.add_argument('--accelerator', type=str, default='auto')
         parser.add_argument('--devices', type=int, default=1)
         parser.add_argument('--default_root_dir', type=str, default='./lightning_logs')
+        
+        # add export options
+        parser.add_argument('--export', action='store_true', help='Export model to TorchScript after training')
+        parser.add_argument('--save_dir', type=str, default='./models', help='Directory to save exported models')
 
         # THIS LINE IS KEY TO PULL THE MODEL NAME
         temp_args, _ = parser.parse_known_args()
@@ -237,3 +242,13 @@ if __name__ == '__main__':
 
         # train!
         trainer.fit(model, train_dataloader, val_dataloader)
+        
+        # Export model if --export flag is set
+        if args.export:
+            print(f"\n{'='*60}")
+            print(f"Exporting trained model: {specifier}")
+            print(f"{'='*60}\n")
+            
+            model_dir = args.default_root_dir
+            export_model(model_dir, args.save_dir)
+        
