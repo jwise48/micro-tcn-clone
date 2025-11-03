@@ -50,6 +50,18 @@ def export_model(model_dir, save_dir):
         print(f"Exporting model: {model_id}")
         
         model = load_model(model_dir)
+        
+        # remove training-only components before TorchScript conversion
+        # these loss functions are not needed for inference and cause
+        # TorchScript compilation errors
+        if hasattr(model, 'l1'):
+            delattr(model, 'l1')
+        if hasattr(model, 'stft'):
+            delattr(model, 'stft')
+        
+        # set to eval mode for inference
+        model.eval()
+        
         script = model.to_torchscript()
         
         if not os.path.isdir(save_dir):
