@@ -65,7 +65,7 @@ nvidia-smi
 # ============================================================================
 # Dataset Configuration
 # ============================================================================
-DATASET_PATH="/home/hice1/jwise48/scratch/data/SignalTrain_LA2A_Dataset_1.1"
+DATASET_PATH="/home/hice1/jwise48/scratch/data/micro-tcn/SignalTrain_LA2A_Dataset_1.1"
 EXPORT_DIR="./models_trained"
 
 echo ""
