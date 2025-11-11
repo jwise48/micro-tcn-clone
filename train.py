@@ -128,6 +128,7 @@ if __name__ == '__main__':
         parser.add_argument('--accelerator', type=str, default='auto')
         parser.add_argument('--devices', type=int, default=1)
         parser.add_argument('--default_root_dir', type=str, default='./lightning_logs')
+        parser.add_argument('--model_name', type=str, default='')
         
         # add export options
         parser.add_argument('--export', action='store_true', help='Export model to TorchScript after training')
@@ -135,9 +136,6 @@ if __name__ == '__main__':
 
         # THIS LINE IS KEY TO PULL THE MODEL NAME
         temp_args, _ = parser.parse_known_args()
-
-        print(f"* Training config {idx+1}/{n_configs}")
-        print(tconf)
     
         # let the model add what it wants
         if temp_args.model_type == 'tcn':
@@ -147,6 +145,12 @@ if __name__ == '__main__':
 
         # parse them args
         args = parser.parse_args()
+
+        if args.model_name not in ["",tconf["name"]]:
+            continue
+        
+        print(f"* Training config {idx+1}/{n_configs}")
+        print(tconf)
 
         tconf["batch_size"] = args.batch_size
 
