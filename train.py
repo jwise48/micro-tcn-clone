@@ -203,7 +203,7 @@ if __name__ == '__main__':
                                         subset=args.train_subset,
                                         fraction=tconf["train_fraction"],
                                         half=use_half,
-                                        preload=args.preload,
+                                        preload=False,
                                         length=args.train_length)
 
         train_dataloader = torch.utils.data.DataLoader(train_dataset, 
@@ -213,7 +213,7 @@ if __name__ == '__main__':
                                                     pin_memory=True)
 
         val_dataset = SignalTrainLA2ADataset(args.root_dir, 
-                                        preload=args.preload,
+                                        preload=False,
                                         half=use_half,
                                         subset=args.val_subset,
                                         length=args.eval_length)
