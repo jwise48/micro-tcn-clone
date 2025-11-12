@@ -4,7 +4,6 @@
 #SBATCH --partition=coe-gpu             # GPU partition
 #SBATCH --gres=gpu:H200:1               # Request 1 H200 GPU
 #SBATCH --mem=0                         # Request all memory on the node
-#SBATCH --mem-per-gpu=224GB             # Memory per GPU (224GB for A100-80GB nodes)
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=12              # CPU cores (for data loading)
 #SBATCH --time=6:00:00                  # Wall time (6 hours per model, conservative)
