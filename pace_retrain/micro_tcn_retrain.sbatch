@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J micro-tcn-model              # Job name with array task ID
 #SBATCH --account=musi                  # PACE account
-#SBATCH --qos=coe-ice                   # quality of service
+#SBATCH --qos=pace-ice                   # quality of service
 #SBATCH --partition=coe-gpu             # GPU partition
 #SBATCH --gres=gpu:H200:1               # Request 1 H200 GPU
 #SBATCH --mem=0                         # Request all memory on the node
