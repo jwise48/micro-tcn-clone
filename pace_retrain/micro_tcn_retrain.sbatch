@@ -14,6 +14,11 @@
 
 set -e  # Exit on error
 
+MODEL_NAME=${1:-"uTCN-100-C"}  # Default to uTCN-100-C if not provided
+
+echo "Model to train: $MODEL_NAME"
+echo ""
+
 echo "Step 1: Loading modules..."
 module load anaconda3/2023.03
 module load cuda/11.8
@@ -68,8 +73,8 @@ echo ""
 
 
 # Run the training script
-python train.py \
-    --model_name "uTCN-100-C" \
+srun python train.py \
+    --model_name "${MODEL_NAME}" \
     --root_dir ${DATASET_PATH} \
     --preload \
     --batch_size ${BATCH_SIZE} \
