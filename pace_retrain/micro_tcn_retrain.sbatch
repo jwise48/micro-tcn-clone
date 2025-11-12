@@ -69,8 +69,8 @@ echo ""
 
 
 # Run the training script
-srun python3 train_model_.py \
-    --model_name ${"uTCN-100-C"} \
+python train.py \
+    --model_name "uTCN-100-C" \
     --root_dir ${DATASET_PATH} \
     --preload \
     --batch_size ${BATCH_SIZE} \
