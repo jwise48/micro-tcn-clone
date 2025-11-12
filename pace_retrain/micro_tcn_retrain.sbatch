@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH -J micro-tcn-model              # Job name with array task ID
 #SBATCH --account=musi                  # PACE account
-#SBATCH --qos=coe-ice                   # Quality of service
 #SBATCH --partition=coe-gpu             # GPU partition
 #SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
 #SBATCH --mem-per-gpu=224GB             # Memory per GPU (224GB for A100-80GB nodes)
