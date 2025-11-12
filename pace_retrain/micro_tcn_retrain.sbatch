@@ -3,10 +3,10 @@
 #SBATCH --account=musi                  # PACE account
 #SBATCH --qos=pace-ice                  # quality of service
 #SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
-#SBATCH --mem=224GB                     # Request all memory on the node
+#SBATCH --mem=0                         # Request all memory on the node
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=12              # CPU cores (for data loading)
-#SBATCH --time=6:00:00                  # Wall time (6 hours per model, conservative)
+#SBATCH --time=4:00:00                  # Wall time (6 hours per model, conservative)
 #SBATCH --mail-type=BEGIN,END,FAIL      # Email notifications
 #SBATCH --mail-user=jwise48@gatech.edu  # Email address
 #SBATCH -o logs/model-%a-report-%j.out  # Output file (array task ID and job ID)
@@ -58,7 +58,7 @@ mkdir -p $EXPORT_DIR
 # Optimized for H100-80GB GPU
 # ============================================================================
 BATCH_SIZE=384         # Optimized for 80GB memory
-NUM_WORKERS=12         # Match cpus-per-task
+NUM_WORKERS=4         # Match cpus-per-task
 MAX_EPOCHS=60          # Standard training length
 PRECISION="16-mixed"   # FP16 mixed precision for Tensor Cores
 
@@ -68,7 +68,6 @@ echo "  Batch Size:    $BATCH_SIZE"
 echo "  Num Workers:   $NUM_WORKERS"
 echo "  Max Epochs:    $MAX_EPOCHS"
 echo "  Precision:     $PRECISION"
-echo "  Preload Data:  Yes (entire dataset in RAM)"
 echo ""
 
 

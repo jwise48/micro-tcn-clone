@@ -148,7 +148,6 @@ if __name__ == '__main__':
 
         if args.model_name not in ["",tconf["name"]]:
             continue
-        
         print(f"* Training config {idx+1}/{n_configs}")
         print(tconf)
 
@@ -203,7 +202,7 @@ if __name__ == '__main__':
                                         subset=args.train_subset,
                                         fraction=tconf["train_fraction"],
                                         half=use_half,
-                                        preload=False,
+                                        preload=args.preload,
                                         length=args.train_length)
 
         train_dataloader = torch.utils.data.DataLoader(train_dataset, 
@@ -213,7 +212,7 @@ if __name__ == '__main__':
                                                     pin_memory=True)
 
         val_dataset = SignalTrainLA2ADataset(args.root_dir, 
-                                        preload=False,
+                                        preload=args.preload,
                                         half=use_half,
                                         subset=args.val_subset,
                                         length=args.eval_length)
