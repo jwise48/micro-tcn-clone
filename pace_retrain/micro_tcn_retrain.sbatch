@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -J micro-tcn-model              # Job name with array task ID
 #SBATCH --account=musi                  # PACE account
-#SBATCH --qos=pace-ice                   # quality of service
-#SBATCH --gres=gpu:H200:1               # Request 1 H200 GPU
-#SBATCH --mem=0                         # Request all memory on the node
+#SBATCH --qos=pace-ice                  # quality of service
+#SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
+#SBATCH --mem=224GB                     # Request all memory on the node
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=12              # CPU cores (for data loading)
 #SBATCH --time=6:00:00                  # Wall time (6 hours per model, conservative)
@@ -76,7 +76,6 @@ echo ""
 srun python train.py \
     --model_name "${MODEL_NAME}" \
     --root_dir ${DATASET_PATH} \
-    --preload \
     --batch_size ${BATCH_SIZE} \
     --num_workers ${NUM_WORKERS} \
     --max_epochs ${MAX_EPOCHS} \
