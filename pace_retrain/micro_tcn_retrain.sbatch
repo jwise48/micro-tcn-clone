@@ -41,7 +41,7 @@ source activate $ENV_NAME
 
 echo ""
 echo "Step 4: Installing PyTorch with CUDA 11.8 support..."
-pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
 
 echo ""
 echo "Step 5: Installing project dependencies..."
