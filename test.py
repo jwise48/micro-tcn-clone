@@ -23,7 +23,7 @@ parser = ArgumentParser()
 
 # add PROGRAM level args
 parser.add_argument('--root_dir', type=str, default='./data')
-parser.add_argument('--model_dir', type=str, default='./lightning_logs/bulk')
+parser.add_argument('--model_dir', type=str, default='/home/hice1/jwise48/scratch/micro-tcn-clone/lightning_logs/bulk')
 parser.add_argument('--save_dir', type=str, default=None)
 parser.add_argument('--preload', action="store_true", default=False)
 parser.add_argument('--half', action="store_true", default=False)
@@ -39,21 +39,21 @@ args = parser.parse_args()
 
 # set the seed
 pl.seed_everything(42)
-
+print("setting up dataset")
 # setup the dataloaders
 test_dataset = SignalTrainLA2ADataset(args.root_dir, 
                                       subset=args.eval_subset,
                                       half=False,
                                       preload=args.preload,
                                       length=args.eval_length)
-
+print("setting up data loader")
 test_dataloader = torch.utils.data.DataLoader(test_dataset, 
                                                shuffle=False,
                                                batch_size=args.batch_size,
                                                num_workers=args.num_workers)
 
 overall_results = {}
-
+print("making save dir")
 if args.save_dir is not None:
     if not os.path.isdir(args.save_dir):
         os.makedirs(args.save_dir)
@@ -62,11 +62,11 @@ if args.save_dir is not None:
 l1   = torch.nn.L1Loss()
 stft = auraloss.freq.STFTLoss()
 meter = pyln.Meter(44100)
-
+print("model directory: ", args.model_dir)
 models = sorted(glob.glob(os.path.join(args.model_dir, "*")))
-
+print("models", enumerate(models))
 for idx, model_dir in enumerate(models):
-
+    print("checkpoint model_dir: ", model_dir)
     results = {}
 
     checkpoint_path = glob.glob(os.path.join(model_dir,
@@ -74,7 +74,7 @@ for idx, model_dir in enumerate(models):
                                              "version_0",
                                              "checkpoints",
                                              "*"))[0]
-    hparams_file = os.path.join(model_dir, "hparams.yaml")
+    hparams_file = os.path.join(model_dir, "lightning_logs", "version_0", "hparams.yaml")
 
     model_id = os.path.basename(model_dir)
     batch_size = int(os.path.basename(model_dir).split('-')[-1][2:])
@@ -122,7 +122,7 @@ for idx, model_dir in enumerate(models):
         target = target.to("cuda:0")
         params = params.to("cuda:0")
 
-        with torch.no_grad(), torch.cuda.amp.autocast():
+        with torch.no_grad(), torch.amp.autocast('cuda'):
             output = model(input, params)
 
             # crop the input and target signals

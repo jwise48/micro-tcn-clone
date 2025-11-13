@@ -89,18 +89,19 @@ def export_all_models(model_dir, save_dir):
     models = sorted(glob.glob(os.path.join(model_dir, "*")))
     
     for idx, model_path in enumerate(models):
+        print("calling export_model with : ", model_path)
         export_model(model_path, save_dir)
 
 
 if __name__ == '__main__':
 
     parser = ArgumentParser()
-
+    print("made parser...")
     # add PROGRAM level args
     parser.add_argument('--model_dir', type=str, default='./lightning_logs/bulk')
     parser.add_argument('--save_dir', type=str, default='./models')
-
+    
     # parse them args
     args = parser.parse_args()
-
+    print("parsed arguments...")
     export_all_models(args.model_dir, args.save_dir)
