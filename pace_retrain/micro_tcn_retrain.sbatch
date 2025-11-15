@@ -3,7 +3,7 @@
 #SBATCH --account=musi                  # PACE account
 #SBATCH --qos=pace-ice                  # quality of service
 #SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
-#SBATCH --mem=512GB                     # Request all memory on the node
+#SBATCH --mem=256GB                     # Optimized memory for batch_size=512
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=16              # CPU cores (for data loading)
 #SBATCH --time=4:00:00                  # Wall time (6 hours per model, conservative)
@@ -87,8 +87,8 @@ mkdir -p $EXPORT_DIR
 # Training Configuration
 # Optimized for H100-80GB GPU
 # ============================================================================
-BATCH_SIZE=512         # 512 - Optimized for 80GB memory
-NUM_WORKERS=12         # Match cpus-per-task
+BATCH_SIZE=512         # Optimized for H100-80GB GPU
+NUM_WORKERS=14         # Optimized for 16 CPUs (leave 2 for system)
 MAX_EPOCHS=70          # Standard training length
 PRECISION="16-mixed"   # FP16 mixed precision for Tensor Cores
 
@@ -118,38 +118,16 @@ srun python train.py \
    --max_epochs ${MAX_EPOCHS} \
    --precision ${PRECISION} \
    --accelerator gpu \
-   --preload
+   --preload \
    --devices 1 \
    --eval_length 65536 \
    --export \
    --save_dir ${EXPORT_DIR}
 
 echo "======================================================"
-echo "TESTING!!!"
+echo "Training completed for ${MODEL_NAME}"
 echo "======================================================"
 echo ""
-
-srun python test.py \
-   --root_dir ${DATASET_PATH} \
-   --save_dir "evaluations" \
-   --num_workers ${NUM_WORKERS}
-
-echo "======================================================"
-echo "Running Speed..."
-echo "======================================================"
-echo ""
-
-
-python speed.py --plot --gpu --rf
-
-echo "======================================================"
-echo "Plotting..."
-echo "======================================================"
-echo ""
-
-python plot.py
-
-echo "======================================================"
-echo "Finished!!!"
-echo "======================================================"
+echo "Note: Run pace_retrain/post_process.sbatch after all models finish training"
+echo "to execute test.py, speed.py, and plot.py on all trained models."
 echo ""

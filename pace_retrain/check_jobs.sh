@@ -241,6 +241,7 @@ if [ "$1" == "--once" ]; then
     show_jobs
     check_completed
     estimate_time
+    show_gpu_usage
     show_job_progress
     check_errors
 else
