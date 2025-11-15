@@ -44,7 +44,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : True,
-     "train_fraction" : 1.00
+     "train_fraction" : 0.10
     },
     {"name" : "uTCN-300-C",
      "model_type" : "tcn",
@@ -157,7 +157,7 @@ if __name__ == '__main__':
         pl.seed_everything(42)
 
         # only run 60 epochs
-        args.max_epochs = 60
+        args.max_epochs = 6
 
         # init the trainer and model 
         if tconf["model_type"] == 'tcn':
@@ -173,8 +173,8 @@ if __name__ == '__main__':
         if "max_epochs" in tconf:
             args.max_epochs = tconf["max_epochs"]
         else:
-            args.max_epochs = 60
-
+            args.max_epochs = 6
+        args.max_epochs = 1
         if "train_loss" in tconf:
             args.train_loss = tconf["train_loss"]
             specifier += f"__loss-{tconf['train_loss']}"
@@ -253,5 +253,6 @@ if __name__ == '__main__':
             print(f"{'='*60}\n")
             
             model_dir = args.default_root_dir
+            print("model dir being passed to export_model(): ", model_dir)
             export_model(model_dir, args.save_dir)
         

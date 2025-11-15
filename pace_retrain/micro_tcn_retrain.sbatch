@@ -3,9 +3,9 @@
 #SBATCH --account=musi                  # PACE account
 #SBATCH --qos=pace-ice                  # quality of service
 #SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
-#SBATCH --mem=224GB                     # Request all memory on the node
+#SBATCH --mem=312GB                     # Request all memory on the node
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
-#SBATCH --cpus-per-task=12              # CPU cores (for data loading)
+#SBATCH --cpus-per-task=16              # CPU cores (for data loading)
 #SBATCH --time=4:00:00                  # Wall time (6 hours per model, conservative)
 #SBATCH --mail-type=BEGIN,END,FAIL      # Email notifications
 #SBATCH --mail-user=jwise48@gatech.edu  # Email address
@@ -16,6 +16,15 @@ set -e  # Exit on error
 echo "======================================================"
 echo "micro-TCN PACE Environment Setup"
 echo "======================================================"
+echo ""
+
+# Show available memory before training
+echo "Available memory before training:"
+free -h
+echo ""
+echo "---"
+echo ""
+echo "---"
 echo ""
 
 # Configuration
@@ -30,14 +39,15 @@ echo ""
 echo "Step 2: Creating conda environment '$ENV_NAME'..."
 if conda env list | grep -q "^${ENV_NAME} "; then
     echo "Environment '$ENV_NAME' already exists."
-else
-    echo "creating conda environment"	
-    conda create -n $ENV_NAME python=$PYTHON_VERSION
+    # conda env remove -n $ENV_NAME -y
 fi
+
+conda create -n $ENV_NAME python=$PYTHON_VERSION -y
+
 
 echo ""
 echo "Step 3: Activating environment..."
-source activate $ENV_NAME
+conda activate $ENV_NAME
 
 echo ""
 echo "Step 4: Installing PyTorch with CUDA 11.8 support..."
@@ -77,9 +87,9 @@ mkdir -p $EXPORT_DIR
 # Training Configuration
 # Optimized for H100-80GB GPU
 # ============================================================================
-BATCH_SIZE=384         # Optimized for 80GB memory
-NUM_WORKERS=1         # Match cpus-per-task
-MAX_EPOCHS=60          # Standard training length
+BATCH_SIZE=128         # 512 - Optimized for 80GB memory
+NUM_WORKERS=4         # Match cpus-per-task
+MAX_EPOCHS=1          # Standard training length
 PRECISION="16-mixed"   # FP16 mixed precision for Tensor Cores
 
 echo ""
@@ -88,6 +98,14 @@ echo "  Batch Size:    $BATCH_SIZE"
 echo "  Num Workers:   $NUM_WORKERS"
 echo "  Max Epochs:    $MAX_EPOCHS"
 echo "  Precision:     $PRECISION"
+echo ""
+
+# Show available memory before training
+echo "Available memory before training:"
+free -h
+echo "---"
+echo ""
+echo "---"
 echo ""
 
 

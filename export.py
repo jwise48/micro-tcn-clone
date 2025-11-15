@@ -48,9 +48,10 @@ def export_model(model_dir, save_dir):
     try:
         model_id = os.path.basename(model_dir)
         print(f"Exporting model: {model_id}")
-        
+        print("model dir:ed to call load_model: ", model_dir)
         model = load_model(model_dir)
-        
+        print("model loaded")
+
         # remove training-only components before TorchScript conversion
         # these loss functions are not needed for inference and cause
         # TorchScript compilation errors
@@ -61,15 +62,20 @@ def export_model(model_dir, save_dir):
         
         # set to eval mode for inference
         model.eval()
-        
+        print("set to eval")
+
         script = model.to_torchscript()
-        
+        print("made script")
+
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
-        
+        print("made save dir")
+
         export_path = os.path.join(save_dir, f"traced_{model_id}.pt")
+        print("exporting model to: ", export_path)
+
         torch.jit.save(script, export_path)
-        print(f"Model exported to: {export_path}")
+        print("Model exported!")
         
         return export_path
         

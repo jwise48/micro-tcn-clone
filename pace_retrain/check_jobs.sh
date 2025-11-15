@@ -48,6 +48,38 @@ show_jobs() {
     echo "  Total:    $TOTAL"
 }
 
+show_job_progress() {
+    echo ""
+    echo "-----------------------------------------------------"
+    echo "Last 10 Lines of Running Jobs"
+    echo "-----------------------------------------------------"
+
+    # Get running job IDs
+    RUNNING_JOBS=$(squeue -u $USER -t RUNNING -h -o "%i %j")
+
+    if [ -z "$RUNNING_JOBS" ]; then
+        echo "  No jobs currently running"
+        return
+    fi
+
+    # For each running job, find its log file and show last 10 lines
+    while IFS= read -r job_line; do
+        JOB_ID=$(echo $job_line | awk '{print $1}')
+        JOB_NAME=$(echo $job_line | awk '{print $2}')
+
+        # Find the output file for this job
+        LOG_FILE=$(find logs -name "*-report-${JOB_ID}.out" 2>/dev/null | head -1)
+
+        if [ -n "$LOG_FILE" ] && [ -f "$LOG_FILE" ]; then
+            echo ""
+            echo "  Job ID: $JOB_ID | Name: $JOB_NAME"
+            echo "  Log: $LOG_FILE"
+            echo "  ----------------------------------------"
+            tail -10 "$LOG_FILE" | sed 's/^/    /'
+        fi
+    done <<< "$RUNNING_JOBS"
+}
+
 # Function to check completed models
 check_completed() {
     echo ""
@@ -95,8 +127,8 @@ check_errors() {
             for error_file in $ERROR_FILES; do
                 if [ -s "$error_file" ]; then
                     echo "  ERROR in: $(basename $error_file)"
-                    echo "  Last 5 lines:"
-                    tail -5 "$error_file" | sed 's/^/    /'
+                    echo "  Last 15 lines:"
+                    tail -15 "$error_file" | sed 's/^/    /'
                     echo ""
                 fi
             done
@@ -142,15 +174,43 @@ show_gpu_usage() {
     echo "GPU Usage for Running Jobs"
     echo "-----------------------------------------------------"
     
-    # Get list of nodes where user's jobs are running
-    NODES=$(squeue -u $USER -t RUNNING -h -o "%N" | sort -u)
+    RUNNING_JOBS=$(squeue -u $USER -t RUNNING -h -o "%i|%j|%N")
     
-    if [ -z "$NODES" ]; then
+    if [ -z "$RUNNING_JOBS" ]; then
         echo "  No jobs currently running on GPUs"
-    else
-        echo "  Jobs running on nodes: $NODES"
-        echo "  (Connect to nodes with: ssh <node> to run nvidia-smi)"
+        return
     fi
+    
+    while IFS='|' read -r JOB_ID JOB_NAME NODE; do
+        echo "  Job: $JOB_NAME (ID: $JOB_ID) on $NODE"
+        
+        # Try SSH first (fast), fall back to srun with timeout
+        GPU_INFO=$(ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no $NODE \
+            "nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total,temperature.gpu --format=csv,noheader,nounits" 2>/dev/null)
+        
+	echo "getting more gpu info"
+        if [ -z "$GPU_INFO" ]; then
+            # SSH failed, try srun with timeout
+            GPU_INFO=$(timeout 30 srun --jobid=$JOB_ID \
+                nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total,temperature.gpu --format=csv,noheader,nounits 2>/dev/null)
+        fi
+
+	echo "done srunning for gpu info"
+
+        if [ -n "$GPU_INFO" ]; then
+            while IFS=',' read -r idx gpu_util mem_used mem_total temp; do
+                printf "    GPU %s: %s%% util | %s/%sMB | %s°C\n" \
+                    "$(echo $idx | xargs)" "$(echo $gpu_util | xargs)" \
+                    "$(echo $mem_used | xargs)" "$(echo $mem_total | xargs)" \
+                    "$(echo $temp | xargs)"
+            done <<< "$GPU_INFO"
+        else
+            echo "    ⚠ GPU query timed out or unavailable"
+        fi
+	echo ""
+	echo "finito!"
+        echo ""
+    done <<< "$RUNNING_JOBS"
 }
 
 # Main monitoring function
@@ -165,6 +225,7 @@ monitor_once() {
     check_completed
     estimate_time
     show_gpu_usage
+    show_job_progress
     check_errors
     
     echo ""
@@ -180,6 +241,7 @@ if [ "$1" == "--once" ]; then
     show_jobs
     check_completed
     estimate_time
+    show_job_progress
     check_errors
 else
     # Continuous monitoring mode
@@ -190,6 +252,6 @@ else
     
     while true; do
         monitor_once
-        sleep 10
+        sleep 20
     done
 fi
