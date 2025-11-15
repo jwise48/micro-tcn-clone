@@ -77,23 +77,23 @@ def plot_recepetive_field_growth():
 
 def runtime_plot(df, name="speed"):
 
-    tcn100  = df[df['model_id'] == 'TCN-100-C']
-    tcn300  = df[df['model_id'] == 'TCN-300-C']
-    tcn324  = df[df['model_id'] == 'TCN-324-N']
-    tcn370  = df[df['model_id'] == 'TCN-370-C']
-    tcn1000 = df[df['model_id'] == 'TCN-1000-C']
+    tcn100  = df[df['model_id'] == 'uTCN-100-C']
+    tcn300  = df[df['model_id'] == 'uTCN-300-C']
+    tcn324  = df[df['model_id'] == 'uTCN-324-N']
+    tcn370  = df[df['model_id'] == 'uTCN-370-C']
+    tcn1000 = df[df['model_id'] == 'uTCN-1000-C']
     lstm32  = df[df['model_id'] == 'LSTM-32-C']
 
     fig, ax = plt.subplots(figsize=(5,3))
 
     marker = itertools.cycle(('x', '+', '.', '^', '*')) 
 
-    #plt.plot(tcn370['N'], tcn370['rtf'], label='TCN-370-C')
-    #plt.plot(tcn100['N'], tcn100['rtf'], marker=next(marker), label='TCN-100-C')
-    plt.plot(tcn324['N'], tcn324['rtf'], marker=next(marker), label='TCN-324-N')
-    plt.plot(tcn300['N'], tcn300['rtf'], marker=next(marker), label='TCN-300-C')
+    #plt.plot(tcn370['N'], tcn370['rtf'], label='uTCN-370-C')
+    #plt.plot(tcn100['N'], tcn100['rtf'], marker=next(marker), label='uTCN-100-C')
+    plt.plot(tcn324['N'], tcn324['rtf'], marker=next(marker), label='uTCN-324-N')
+    plt.plot(tcn300['N'], tcn300['rtf'], marker=next(marker), label='uTCN-300-C')
 
-    #plt.plot(tcn1000['N'], tcn1000['rtf'], marker=next(marker), label='TCN-1000-C')
+    #plt.plot(tcn1000['N'], tcn1000['rtf'], marker=next(marker), label='uTCN-1000-C')
     plt.plot(lstm32['N'], lstm32['rtf'], marker=next(marker), label='LSTM-32')
 
     ax.spines['top'].set_visible(False)
@@ -262,10 +262,20 @@ if __name__ == '__main__':
     if not os.path.isdir("plots"):
         os.makedirs("plots")
 
-    df_gpu = pd.read_csv("speed_gpu_rtx3090.csv", index_col=0)
-    df_cpu = pd.read_csv("speed_cpu_macbook_v2.csv", index_col=0)
+    df_gpu = pd.read_csv("speed_gpu.csv", index_col=0)
+    # df_cpu = pd.read_csv("speed_cpu.csv", index_col=0)
 
-    #runtime_plot(df_gpu, name="speed_gpu")
-    #runtime_plot(df_cpu, name="speed_cpu")
-    joint_runtime_plot(df_gpu, df_cpu)
+    print("\n=== DEBUG: DataFrame Info ===")
+    print("Columns:", df_gpu.columns.tolist())
+    print("\nFirst few rows:")
+    print(df_gpu.head(10))
+    print("\nDataFrame shape:", df_gpu.shape)
+    print("\nColumn dtypes:")
+    print(df_gpu.dtypes)
+    print("=" * 50 + "\n")
+
+
+    runtime_plot(df_gpu, name="speed_gpu")
+    # runtime_plot(df_cpu, name="speed_cpu")
+    # joint_runtime_plot(df_gpu, df_cpu)
 

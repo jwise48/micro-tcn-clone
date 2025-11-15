@@ -10,6 +10,8 @@ from microtcn.tcn import TCNModel
 from microtcn.lstm import LSTMModel
 from microtcn.data import SignalTrainLA2ADataset
 from export import export_model
+from pytorch_lightning.callbacks import ModelCheckpoint
+
 
 torch.backends.cudnn.benchmark = True
 """
@@ -44,7 +46,7 @@ train_configs = [
      "dilation_growth" : 10,
      "kernel_size" : 5,
      "causal" : True,
-     "train_fraction" : 0.10
+     "train_fraction" : 1.00
     },
     {"name" : "uTCN-300-C",
      "model_type" : "tcn",
@@ -156,9 +158,6 @@ if __name__ == '__main__':
         # set the seed
         pl.seed_everything(42)
 
-        # only run 60 epochs
-        args.max_epochs = 6
-
         # init the trainer and model 
         if tconf["model_type"] == 'tcn':
             specifier =  f"{idx+1}-{tconf['name']}"
@@ -174,7 +173,10 @@ if __name__ == '__main__':
             args.max_epochs = tconf["max_epochs"]
         else:
             args.max_epochs = 6
-        args.max_epochs = 1
+        
+        # Set a blanket max epoch of 70
+        args.max_epochs = 70
+        
         if "train_loss" in tconf:
             args.train_loss = tconf["train_loss"]
             specifier += f"__loss-{tconf['train_loss']}"
@@ -185,6 +187,16 @@ if __name__ == '__main__':
         args.default_root_dir = os.path.join("lightning_logs", "bulk", specifier)
         print(args.default_root_dir)
         
+        
+        # Add checkpoint callback
+        checkpoint_callback = ModelCheckpoint(
+            dirpath=os.path.join(args.default_root_dir, "lightning_logs/version_0/checkpoints"),
+            filename="epoch={epoch:02d}",
+            save_top_k=1,
+            monitor="val_loss",
+            mode="min"
+        )
+
         # Create trainer with explicit arguments (PyTorch Lightning 2.x compatible)
         trainer = pl.Trainer(
             max_epochs=args.max_epochs,
@@ -192,6 +204,7 @@ if __name__ == '__main__':
             accelerator=args.accelerator if hasattr(args, 'accelerator') else 'auto',
             devices=args.devices if hasattr(args, 'devices') else 1,
             default_root_dir=args.default_root_dir,
+            callbacks=[checkpoint_callback]
         )
 
         # setup the dataloaders

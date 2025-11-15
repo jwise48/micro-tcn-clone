@@ -3,7 +3,7 @@
 #SBATCH --account=musi                  # PACE account
 #SBATCH --qos=pace-ice                  # quality of service
 #SBATCH --gres=gpu:H100:1               # Request 1 H100 GPU
-#SBATCH --mem=312GB                     # Request all memory on the node
+#SBATCH --mem=512GB                     # Request all memory on the node
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=16              # CPU cores (for data loading)
 #SBATCH --time=4:00:00                  # Wall time (6 hours per model, conservative)
@@ -39,7 +39,7 @@ echo ""
 echo "Step 2: Creating conda environment '$ENV_NAME'..."
 if conda env list | grep -q "^${ENV_NAME} "; then
     echo "Environment '$ENV_NAME' already exists."
-    # conda env remove -n $ENV_NAME -y
+    conda env remove -n $ENV_NAME -y
 fi
 
 conda create -n $ENV_NAME python=$PYTHON_VERSION -y
@@ -87,9 +87,9 @@ mkdir -p $EXPORT_DIR
 # Training Configuration
 # Optimized for H100-80GB GPU
 # ============================================================================
-BATCH_SIZE=128         # 512 - Optimized for 80GB memory
-NUM_WORKERS=4         # Match cpus-per-task
-MAX_EPOCHS=1          # Standard training length
+BATCH_SIZE=512         # 512 - Optimized for 80GB memory
+NUM_WORKERS=12         # Match cpus-per-task
+MAX_EPOCHS=70          # Standard training length
 PRECISION="16-mixed"   # FP16 mixed precision for Tensor Cores
 
 echo ""
@@ -111,23 +111,45 @@ echo ""
 
 # Run the training script
 srun python train.py \
-    --model_name "${MODEL_NAME}" \
-    --root_dir ${DATASET_PATH} \
-    --batch_size ${BATCH_SIZE} \
-    --num_workers ${NUM_WORKERS} \
-    --max_epochs ${MAX_EPOCHS} \
-    --precision ${PRECISION} \
-    --accelerator gpu \
-    --devices 1 \
-    --export \
-    --save_dir ${EXPORT_DIR}
+   --model_name "${MODEL_NAME}" \
+   --root_dir ${DATASET_PATH} \
+   --batch_size ${BATCH_SIZE} \
+   --num_workers ${NUM_WORKERS} \
+   --max_epochs ${MAX_EPOCHS} \
+   --precision ${PRECISION} \
+   --accelerator gpu \
+   --preload
+   --devices 1 \
+   --eval_length 65536 \
+   --export \
+   --save_dir ${EXPORT_DIR}
+
+echo "======================================================"
+echo "TESTING!!!"
+echo "======================================================"
+echo ""
 
 srun python test.py \
-    --root_dir ${DATASET_PATH} \
-    --model_dir ${EXPORT_DIR} \
-    --save_dir "evaluations" \
-    --num_workers ${NUM_WORKERS}
+   --root_dir ${DATASET_PATH} \
+   --save_dir "evaluations" \
+   --num_workers ${NUM_WORKERS}
 
-srun python speed.py --plot --full --gpu --rf
+echo "======================================================"
+echo "Running Speed..."
+echo "======================================================"
+echo ""
 
-srun python plot.py
+
+python speed.py --plot --gpu --rf
+
+echo "======================================================"
+echo "Plotting..."
+echo "======================================================"
+echo ""
+
+python plot.py
+
+echo "======================================================"
+echo "Finished!!!"
+echo "======================================================"
+echo ""

@@ -79,7 +79,7 @@ for idx, model_dir in enumerate(models):
     model_id = os.path.basename(model_dir)
     batch_size = int(os.path.basename(model_dir).split('-')[-1][2:])
     model_type = os.path.basename(model_dir).split('-')[1]
-    epoch = int(os.path.basename(checkpoint_path).split('-')[0].split('=')[-1])
+    epoch = int(os.path.basename(checkpoint_path).split('-')[0].split('=')[-1].replace(".ckpt", ""))
 
     if model_type == "LSTM":
         if args.fast: continue

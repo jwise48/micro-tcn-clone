@@ -17,7 +17,7 @@ def load_model(model_dir, gpu=False):
     hparams_file = os.path.join(model_dir, "hparams.yaml")
     batch_size = int(os.path.basename(model_dir).split('-')[-1][2:])
     model_type = os.path.basename(model_dir).split('-')[1]
-    epoch = int(os.path.basename(checkpoint_path).split('-')[0].split('=')[-1])
+    epoch = int(os.path.basename(checkpoint_path).split('-')[0].split('=')[-1].replace(".ckpt",""))
 
     map_location = "cuda:0" if gpu else "cpu"
 
