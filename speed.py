@@ -127,14 +127,15 @@ if __name__ == '__main__':
                 })
     else:
         frame_sizes = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
-        causal      = [True, False]
+        causal      = [True]
         for c, N in product(causal, frame_sizes):
-            model_id = ["TCN-370", "TCN-100", "TCN-300", "TCN-1000", "TCN-324", "LSTM-32", "TCN-324-16", "TCN-324-8"]
-            model_type = ["TCN", "TCN", "TCN", "TCN", "TCN", "LSTM", "TCN", "TCN"]
-            nblocks          = [ 3, 4,  4,  5, 10, 0, 10, 10]
-            dilation_factors = [64,10, 10, 10,  2, 0, 2, 2]
-            kernels          = [ 5, 5, 13,  5, 15, 0, 15, 15]
-            channels         = [32, 32, 32, 32, 32, 0, 16, 8]
+            model_id = ["uTCN-3-5", "uTCN-3-13", "uTCN-3-17", "uTCN-3-21", "uTCN-3-25", "uTCN-3-33", "uTCN-3-37", "uTCN-100", "uTCN-107", "uTCN-109", "uTCN-111", "uTCN-300", "uTCN-1000"]
+            model_type = ["TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN", "TCN"]
+            nblocks          = [ 3, 3,  3,  3,  3,  3,  3,  4,  4,   4,  4,  4, 5]
+            dilation_factors = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+            kernels          = [ 5, 13, 17, 21, 25, 33, 37, 5,  7,   9, 11, 13, 5]
+            channels         = [32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32]
+            
             for mid, m, b, d, k, ch in zip(model_id, 
                                         model_type, 
                                         nblocks, 

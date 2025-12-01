@@ -40,11 +40,91 @@ The 14 Model Configurations:
 """
 
 train_configs = [
+    {"name" : "uTCN-3-5-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 5,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },    
+    {"name" : "uTCN-3-13-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 13,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-3-17-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 17,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-3-21-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 21,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-3-25-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 25,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-3-33-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 33,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-3-37-C",
+     "model_type" : "tcn",
+     "nblocks" : 3,
+     "dilation_growth" : 10,
+     "kernel_size" : 37,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
     {"name" : "uTCN-100-C",
      "model_type" : "tcn",
      "nblocks" : 4,
      "dilation_growth" : 10,
      "kernel_size" : 5,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-107-C",
+     "model_type" : "tcn",
+     "nblocks" : 4,
+     "dilation_growth" : 10,
+     "kernel_size" : 7,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-109-C",
+     "model_type" : "tcn",
+     "nblocks" : 4,
+     "dilation_growth" : 10,
+     "kernel_size" : 9,
+     "causal" : True,
+     "train_fraction" : 1.00
+    },
+    {"name" : "uTCN-111-C",
+     "model_type" : "tcn",
+     "nblocks" : 4,
+     "dilation_growth" : 10,
+     "kernel_size" : 11,
      "causal" : True,
      "train_fraction" : 1.00
     },
@@ -175,7 +255,7 @@ if __name__ == '__main__':
             args.max_epochs = 6
         
         # Set a blanket max epoch of 70
-        args.max_epochs = 70
+        args.max_epochs = 120
         
         if "train_loss" in tconf:
             args.train_loss = tconf["train_loss"]

@@ -1,25 +1,51 @@
 #!/bin/bash
 
-# Submit jobs and collect IDs
-JOBS=()
-for model in uTCN-100-C uTCN-300-C uTCN-1000-C uTCN-100-N uTCN-300-N uTCN-1000-N; do
-    JOB_ID=$(sbatch --parsable pace_retrain/micro_tcn_retrain.sbatch $model)
-    JOBS+=($JOB_ID)
-    echo "Submitted $model: Job $JOB_ID"
-done
+echo "======================================================"
+echo "micro-TCN Complete Training Pipeline"
+echo "======================================================"
 
-# Wait for all jobs to complete
-echo "Waiting for jobs to complete: ${JOBS[*]}"
-while true; do
-    # Check if any jobs are still running
-    RUNNING=$(squeue -j $(IFS=,; echo "${JOBS[*]}") -h | wc -l)
-    if [ $RUNNING -eq 0 ]; then
-        break
-    fi
-    echo "Still running: $RUNNING jobs"
-    bash pace_retrain/check_jobs.sh --once
-    sleep 60
-done
+# Step 0: Ensure environment exists (runs on login node)
+echo "Step 0: Checking environment setup..."
+if ! conda env list | grep -q "^micro-tcn-env "; then
+    echo "Environment not found. Running setup..."
+    bash pace_retrain/setup_environment.sh
+else
+    echo "Environment already exists. Skipping setup."
+fi
 
-echo "All training jobs completed. Starting post-processing..."
-sbatch pace_retrain/post_process.sbatch
+echo ""
+echo "======================================================"
+echo "Running test.py to evaluate all trained models"
+echo "======================================================"
+echo ""
+
+srun python test.py \
+   --root_dir ${DATASET_PATH} \
+   --model_dir ${MODEL_DIR} \
+   --save_dir ${SAVE_DIR} \
+   --num_workers 14
+
+echo ""
+echo "======================================================"
+echo "Running speed.py for performance benchmarks"
+echo "======================================================"
+echo ""
+
+python speed.py --plot --gpu --rf
+
+echo ""
+echo "======================================================"
+echo "Running plot.py to generate visualizations"
+echo "======================================================"
+echo ""
+
+python plot.py
+
+echo ""
+echo "======================================================"
+echo "Post-processing completed successfully!"
+echo "======================================================"
+echo ""
+echo "Results saved to: ${SAVE_DIR}"
+echo "Test results: test_results_val.p"
+echo ""

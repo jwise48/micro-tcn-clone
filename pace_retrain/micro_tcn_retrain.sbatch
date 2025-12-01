@@ -6,7 +6,7 @@
 #SBATCH --mem=256GB                     # Optimized memory for batch_size=512
 #SBATCH --ntasks-per-node=1             # Number of tasks per node
 #SBATCH --cpus-per-task=16              # CPU cores (for data loading)
-#SBATCH --time=4:00:00                  # Wall time (6 hours per model, conservative)
+#SBATCH --time=6:30:00                  # Wall time (6 hours per model, conservative)
 #SBATCH --mail-type=BEGIN,END,FAIL      # Email notifications
 #SBATCH --mail-user=jwise48@gatech.edu  # Email address
 #SBATCH -o logs/model-%a-report-%j.out  # Output file (array task ID and job ID)
@@ -36,26 +36,8 @@ module load anaconda3/2023.03
 module load cuda/11.8
 
 echo ""
-echo "Step 2: Creating conda environment '$ENV_NAME'..."
-if conda env list | grep -q "^${ENV_NAME} "; then
-    echo "Environment '$ENV_NAME' already exists."
-    conda env remove -n $ENV_NAME -y
-fi
-
-conda create -n $ENV_NAME python=$PYTHON_VERSION -y
-
-
-echo ""
-echo "Step 3: Activating environment..."
+echo "Step 2: Activating environment..."
 conda activate $ENV_NAME
-
-echo ""
-echo "Step 4: Installing PyTorch with CUDA 11.8 support..."
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-
-echo ""
-echo "Step 5: Installing project dependencies..."
-pip install -r requirements.txt
 
 MODEL_NAME=${1:-"uTCN-100-C"}  # Default to uTCN-100-C if not provided
 
@@ -63,7 +45,7 @@ echo "Model to train: $MODEL_NAME"
 echo ""
 
 echo ""
-echo "Step 4: Displaying GPU information..."
+echo "Step 3: Displaying GPU information..."
 nvidia-smi
 
 # ============================================================================
@@ -73,7 +55,7 @@ DATASET_PATH="/home/hice1/jwise48/scratch/data/micro-tcn/SignalTrain_LA2A_Datase
 EXPORT_DIR="./models_trained"
 
 echo ""
-echo "Step 5: Checking dataset..."
+echo "Step 4: Checking dataset..."
 if [ ! -d "$DATASET_PATH" ]; then
     echo "ERROR: Dataset not found at $DATASET_PATH"
     exit 1
@@ -89,7 +71,7 @@ mkdir -p $EXPORT_DIR
 # ============================================================================
 BATCH_SIZE=512         # Optimized for H100-80GB GPU
 NUM_WORKERS=14         # Optimized for 16 CPUs (leave 2 for system)
-MAX_EPOCHS=70          # Standard training length
+MAX_EPOCHS=120          # Standard training length
 PRECISION="16-mixed"   # FP16 mixed precision for Tensor Cores
 
 echo ""

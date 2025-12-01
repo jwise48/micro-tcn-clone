@@ -204,5 +204,5 @@ for idx, model_dir in enumerate(models):
     overall_results[model_id] = results
 
 pickle.dump(overall_results, open(f"test_results_{args.eval_subset}.p", "wb" ))
-
+json.dump(overall_results, open(f"test_results_{args.eval_subset}.json", "w", indent=4))
 # we can make some kind of scatter plot to visualize this

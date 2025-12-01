@@ -9,7 +9,7 @@
 #SBATCH --time=2:00:00                  # Wall time (2 hours should be sufficient)
 #SBATCH --mail-type=BEGIN,END,FAIL      # Email notifications
 #SBATCH --mail-user=jwise48@gatech.edu  # Email address
-#SBATCH -o logs/postprocess-report-%j.out
+#SBATCH -o logs/postprocess-speed-report-%j.out
 #SBATCH -e logs/postprocess-error-%j.err
 
 set -e  # Exit on error
@@ -20,15 +20,49 @@ echo "======================================================"
 echo ""
 
 # Configuration
-ENV_NAME="micro-tcn-env"
+#ENV_NAME="micro-tcn-env"
 
-echo "Step 1: Loading required modules..."
+#echo "Step 1: Loading required modules..."
+#module load anaconda3/2023.03
+#module load cuda/11.8
+
+#echo ""
+#echo "Step 2: Activating environment..."
+#conda activate $ENV_NAME
+
+
+echo "Removing conda env: micro-tcn-env..."
+echo ""
+
+rm -rf ~/.conda/envs/micro-tcn-env
+
+echo "Loading modules..."
+echo ""
+
 module load anaconda3/2023.03
 module load cuda/11.8
 
-echo ""
-echo "Step 2: Activating environment..."
-conda activate $ENV_NAME
+ENV_NAME="micro-tcn-env"
+PYTHON_VERSION="3.10"
+
+# Create environment if it doesn't exist
+if ! conda env list | grep -q "^${ENV_NAME} "; then
+    echo "Creating conda environment..."
+    conda create -n $ENV_NAME python=$PYTHON_VERSION -y
+    conda activate $ENV_NAME
+
+    echo "Installing PyTorch..."
+    pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 \
+        --index-url https://download.pytorch.org/whl/cu118
+
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+
+    echo "Environment setup complete!"
+else
+    echo "Environment already exists!"
+fi
+
 
 echo ""
 echo "Step 3: Displaying GPU information..."
@@ -67,11 +101,11 @@ echo "Running test.py to evaluate all trained models"
 echo "======================================================"
 echo ""
 
-srun python test.py \
-   --root_dir ${DATASET_PATH} \
-   --model_dir ${MODEL_DIR} \
-   --save_dir ${SAVE_DIR} \
-   --num_workers 14
+#srun python test.py \
+#   --root_dir ${DATASET_PATH} \
+#   --model_dir ${MODEL_DIR} \
+#   --save_dir ${SAVE_DIR} \
+#   --num_workers 14
 
 echo ""
 echo "======================================================"
@@ -79,7 +113,7 @@ echo "Running speed.py for performance benchmarks"
 echo "======================================================"
 echo ""
 
-python speed.py --plot --gpu --rf
+srun python speed.py --plot --rf
 
 echo ""
 echo "======================================================"
@@ -87,7 +121,7 @@ echo "Running plot.py to generate visualizations"
 echo "======================================================"
 echo ""
 
-python plot.py
+srun python plot.py
 
 echo ""
 echo "======================================================"
